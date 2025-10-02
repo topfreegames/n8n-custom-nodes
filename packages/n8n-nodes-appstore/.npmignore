@@ -1,2 +1,36 @@
-.DS_Store
+# Source files
+nodes/
+credentials/
+*.ts
+tsconfig.json
+gulpfile.js
+
+# Development files
+.vscode/
+.git/
+.env*
+*.log
+node_modules/
+
+# Build artifacts
 *.tsbuildinfo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development workflows (keep in repo but don't publish)
+workflows/
+
+# Documentation that's not needed in npm package
+CODE_OF_CONDUCT.md
+
+# Development scripts (keep in repo but don't publish)
+run-n8n.ps1
+run-n8n.sh
+Makefile
+
+# Development configs
+.eslintrc*
+.prettierrc*
+.editorconfig

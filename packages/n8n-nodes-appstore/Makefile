@@ -1,14 +1,47 @@
-NGORK_PATH =C:\Users\steyl\AppData\Roaming\npm\ngrok.ps1
+# Cross-platform Makefile for n8n AppStore Connect node
 
+# Default target - detect OS and run appropriate script
 run:
+ifeq ($(OS),Windows_NT)
+	@echo "🪟 Detected Windows - using PowerShell script"
+	powershell -ExecutionPolicy Bypass -File ./run-n8n.ps1
+else
+	@echo "🐧 Detected Unix/Linux/macOS - using bash script"
+	./run-n8n.sh
+endif
+
+# Explicit Windows target
+run-windows:
+	@echo "🪟 Running Windows version"
+	powershell -ExecutionPolicy Bypass -File ./run-n8n.ps1
+
+# Explicit Unix/Linux/macOS target  
+run-unix:
+	@echo "🐧 Running Unix/Linux/macOS version"
+	./run-n8n.sh
+
+# Build only
+build:
 	npm run build
+
+# Link only (after build)
+link: build
 	npm link
 
-	rem Start ngrok in background with full path
-	start "" /B cmd /C "$(NGROK_PATH) http 5678 > nul"
+# Clean build artifacts
+clean:
+	npm run build -- --clean
+	rm -rf dist/
 
-	timeout /t 3 > nul
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  run         - Auto-detect OS and run appropriate script"
+	@echo "  run-windows - Force Windows PowerShell script"
+	@echo "  run-unix    - Force Unix/Linux/macOS bash script"
+	@echo "  build       - Build the node"
+	@echo "  link        - Build and link the node"
+	@echo "  clean       - Clean build artifacts"
+	@echo "  help        - Show this help"
 
-	for /f "tokens=*" %%i in ('powershell -Command "(Invoke-RestMethod http://127.0.0.1:4040/api/tunnels).tunnels[0].public_url"') do set TUNNEL_URL=%%i
-
-	start cmd /k "set WEBHOOK_TUNNEL_URL=%TUNNEL_URL% && cd /d %USERPROFILE%\.n8n\custom && n8n"
+.PHONY: run run-windows run-unix build link clean help
