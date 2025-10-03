@@ -1,0 +1,39 @@
+{
+  "name": "n8n-custom-nodes",
+  "version": "1.0.0",
+  "description": "Custom n8n community nodes",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lintfix": "npm run lintfix --workspaces",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "keywords": [
+    "n8n",
+    "n8n-community-node-package",
+    "topfreegames",
+    "workflow",
+    "automation"
+  ],
+  "author": {
+    "name": "Wildlife Studios",
+    "email": "dept.cloudplatformengineering@wildlifestudios.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/topfreegames/n8n-custom-nodes.git"
+  },
+  "homepage": "https://github.com/topfreegames/n8n-custom-nodes#readme",
+  "devDependencies": {
+    "@typescript-eslint/parser": "~8.32.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

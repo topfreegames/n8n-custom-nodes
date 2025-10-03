@@ -1,0 +1,1296 @@
+{
+  "name": "Appstore permissions",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": [
+          "message"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C098BLZFQ3D",
+          "mode": "list",
+          "cachedResultName": "all-teste-appstore"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2208,
+        448
+      ],
+      "id": "762f9fe3-53e0-4ffc-91d3-84328cf802b3",
+      "name": "Slack Trigger",
+      "webhookId": "e2dd4485-1821-4c9b-abb9-4e2f3cb059c0",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"challenge\": \"{{ $node[\"Webhook\"].json[\"body\"][\"challenge\"] }}\"}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "5aa0a761-9420-41b7-a3ab-5a72ba30ed5e",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json[\"body\"].type }}",
+              "value2": "url_verification"
+            }
+          ]
+        }
+      },
+      "id": "4d7a8232-e0c2-4711-8e46-eb3084d8b431",
+      "name": "Is API URL verification?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -2032,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Slack Trigger').first().json.user }}",
+          "mode": "id"
+        },
+        "message": "Access to account request",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Is a Account Creation or Account modification?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Create a New Account"
+                  },
+                  {
+                    "option": "Modify an Existing Account"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is your App Store Connect Email?",
+              "placeholder": "App Store Connect Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is your first name?",
+              "placeholder": "first name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is your last name?",
+              "placeholder": "Last Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Which roles do you need for the account you need access on?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "FINANCE"
+                  },
+                  {
+                    "option": "SALES"
+                  },
+                  {
+                    "option": "MARKETING"
+                  },
+                  {
+                    "option": "APP_MANAGER"
+                  },
+                  {
+                    "option": "DEVELOPER"
+                  },
+                  {
+                    "option": "CUSTOMER_SUPPORT"
+                  }
+                ]
+              },
+              "multiselect": true,
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "=Put the IDs of the apps that you want to get Access. Write in a comma-separated String without spaces.(The Finance role make all apps visible)",
+              "placeholder": "The names of the Apps that you want access",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What is the ID of the manager of the games you choose?",
+              "placeholder": "Username of the manager"
+            },
+            {
+              "fieldLabel": "Why do you need this access?"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -880,
+        432
+      ],
+      "id": "c004988f-0d86-4745-8a2f-d904d525a11a",
+      "name": "Message user asking for request details",
+      "webhookId": "490c4fd8-d7ce-48bd-a5bf-4f5e86c5c8ba",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Message user asking for request details').first().json.data['What is the ID of the manager of the games you choose?'] }}",
+          "mode": "id"
+        },
+        "message": "=Approve here\nRequest made by: {{ $('Message user asking for request details').item.json.data['What is your first name?'] }} {{ $('Message user asking for request details').item.json.data['What is your last name?'] }}\nUser Id: {{ $('Slack Trigger').first().json.user }}\nApps: {{ $('Message user asking for request details').first().json.data['Put the IDs of the apps that you want to get Acess. Write in a comma-separated String without spaces.(The Finance role make all apps visible)'] }}\nRoles: {{ $('Message user asking for request details').item.json.data['Which roles do you need for the account you need access on?'] }}\n\nReason: {{ $('Message user asking for request details').item.json.data['Why do you need this access?'] }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        288
+      ],
+      "id": "d3941f8c-1ec2-4699-8c8a-20819464e867",
+      "name": "Send details for manager approval",
+      "webhookId": "9dc26669-6496-416a-96bb-f03309c753af",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f31bb58a-cd84-4e71-a761-8e286ff6ead8",
+              "leftValue": "={{ $('Send details for manager approval').first().json.data.approved }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1584,
+        256
+      ],
+      "id": "c8412ba5-4142-4cd9-9f56-010148a7f3e5",
+      "name": "Request approved by manager?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "98a37be9-acd7-4514-bbf9-0520f5d0f6bc",
+              "leftValue": "={{ $('Message user asking for request details').first().json.data['What is the ID of the manager of the games you choose?'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        448
+      ],
+      "id": "3e239d67-e43c-4cee-a459-278e208d9155",
+      "name": "Request needs manager approval?"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0980AM94AK",
+          "mode": "list",
+          "cachedResultName": "build-team"
+        },
+        "message": "=Approve here\nRequest made by: {{ $('Message user asking for request details').first().json.data['What is your first name?'] }} {{ $('Message user asking for request details').first().json.data['What is your last name?'] }}\nUser Id: {{ $('Slack Trigger').first().json.user }}\nApps: {{ $('Message user asking for request details').first().json.data['Put the IDs of the apps that you want to get Acess. Write in a comma-separated String without spaces.'] }}\nRoles: {{ $('Message user asking for request details').first().json.data['Which roles do you need for the account you need access on?'] }}\n\nReason: {{ $('Message user asking for request details').first().json.data['Why do you need this access?'] }}\n\nRequest Accepted by manager: {{ $('Get information about the manager').first().json.name }}\nWith ID: {{ $('Get information about the manager').first().json.id }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Granted",
+            "disapproveLabel": "Denied"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        352
+      ],
+      "id": "39d4344a-f488-4250-ad79-04750bad5974",
+      "name": "Send to Build team",
+      "webhookId": "066216d5-44d4-448c-a0d6-26f3223dd858",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Slack Trigger').first().json.user }}",
+          "mode": "id"
+        },
+        "text": "Your request for app store connect access was denied by the manger you chose.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2032,
+        224
+      ],
+      "id": "e08310b4-e54d-4396-acb9-371965dd6f99",
+      "name": "Notify manager denied request to user",
+      "webhookId": "cf45e1f9-2ac8-4cfc-be79-9e9aacd3a924",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f31bb58a-cd84-4e71-a761-8e286ff6ead8",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        448
+      ],
+      "id": "16f25c58-162c-4b59-a0f0-19c250648c04",
+      "name": "Request approved by build team?"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Slack Trigger').first().json.user }}",
+          "mode": "id"
+        },
+        "text": "Your request for app store connect access could not be granted.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2080,
+        608
+      ],
+      "id": "5d4edb42-88a9-46d0-bfce-33087a018bdc",
+      "name": "Notify Build team denied request to user",
+      "webhookId": "cf45e1f9-2ac8-4cfc-be79-9e9aacd3a924",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0980AM94AK",
+          "mode": "list",
+          "cachedResultName": "build-team"
+        },
+        "text": "Your request for app store connect access was granted.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3504,
+        464
+      ],
+      "id": "1fd4c220-7897-420a-bd25-03dc59b4543b",
+      "name": "Notify Build team granted request to user",
+      "webhookId": "cf45e1f9-2ac8-4cfc-be79-9e9aacd3a924",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4aa47cf8-5edd-4898-9dbc-c85f12ff260a",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "User not found",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        640
+      ],
+      "id": "c2275294-03a0-42a6-b2a4-4586e20330d5",
+      "name": "Verify Username Exists"
+    },
+    {
+      "parameters": {
+        "operation": "modify_a_user_account",
+        "userId": "={{ $('Modify a User Account').first().json.id }}",
+        "roles": "={{ $('Transform Roles List into comma-separated string').first().json.output }}",
+        "visibleApps": "={{ $('Message user asking for request details').first().json.data['Put the IDs of the apps that you want to get Access. Write in a comma-separated String without spaces.(The Finance role make all apps visible)'] }}"
+      },
+      "type": "CUSTOM.appStore",
+      "typeVersion": 1,
+      "position": [
+        3152,
+        624
+      ],
+      "id": "04df40ad-d22f-469e-ad9e-10ece9cf4b49",
+      "name": "Give the asked roles to the User"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "30af3891-f818-4053-b8bd-20bce4bf1ecc",
+              "leftValue": "={{ $('Message user asking for request details').item.json.data['Is a Account Creation or Account modification?'] }}",
+              "rightValue": "Create a New Account",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        432
+      ],
+      "id": "717c3cec-5e4c-4647-b4f0-d58390857642",
+      "name": "Verify if is a User Creation"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Is API URL verification?').first().json.user }}",
+          "mode": "id"
+        },
+        "text": "User Not Found. Try it again.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -1040,
+        624
+      ],
+      "id": "4e602094-24bc-4d16-8410-2e787779b33a",
+      "name": "Message user reporting User not found",
+      "webhookId": "490c4fd8-d7ce-48bd-a5bf-4f5e86c5c8ba",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "30af3891-f818-4053-b8bd-20bce4bf1ecc",
+              "leftValue": "={{ $('Message user asking for request details').item.json.data['Is a Account Creation or Account modification?'] }}",
+              "rightValue": "Create a New Account",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2880,
+        448
+      ],
+      "id": "41531a0f-70bc-42f6-a8d6-441b5867c51b",
+      "name": "Verify if is a User Creation1"
+    },
+    {
+      "parameters": {
+        "resource": "userInvitations",
+        "operation": "invite_a_user",
+        "roles": "={{ $('Transform Roles List into comma-separated string').first().json.output }}\n",
+        "email": "={{ $('Message user asking for request details').first().json.data['What is your App Store Connect Email?'] }}",
+        "firstName": "={{ $('Message user asking for request details').first().json.data['What is your first name?'] }}",
+        "lastName": "={{ $('Message user asking for request details').first().json.data['What is your last name?'] }}",
+        "visibleApps": "={{ $('Message user asking for request details').first().json.data['Put the IDs of the apps that you want to get Access. Write in a comma-separated String without spaces.(The Finance role make all apps visible)'] }}"
+      },
+      "type": "CUSTOM.appStore",
+      "typeVersion": 1,
+      "position": [
+        3152,
+        304
+      ],
+      "id": "320f6edb-4bfa-4c81-a22c-2dc5931013fe",
+      "name": "Invite a User"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Slack Trigger').first().json.user }}",
+          "mode": "id"
+        },
+        "text": "=These are All the available apps. Choose the apps that you want and put the names separated by comma characters, without space\n\n{{ $json.names }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -1088,
+        432
+      ],
+      "id": "613328f6-0355-4247-a877-5899cc4e4afa",
+      "name": "Message user Showing Apps",
+      "webhookId": "490c4fd8-d7ce-48bd-a5bf-4f5e86c5c8ba",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "apps",
+        "operation": "get_all_apps"
+      },
+      "type": "CUSTOM.appStore",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        432
+      ],
+      "id": "10655478-d152-4419-8263-c66cc73fc2cb",
+      "name": "Get All Available Apps"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input items (each item is an app)\nconst items = $input.all();\n\n// Map to format: \"1 - App Name - ID\"\nconst numberedNames = items.map((item, index) => {\n    const name = item.json.attributes.name;\n    const id = item.json.id;\n    return `${index + 1} - ${name} - ${id}`;\n});\n\n// Join them into a single string with line breaks\nconst namesString = numberedNames.join('\\n');\n\nreturn [\n  {\n    json: {\n      names: namesString\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1312,
+        432
+      ],
+      "id": "e2f5d872-4dfe-46f8-a9a3-f108ef29499d",
+      "name": "Format the Apps into String"
+    },
+    {
+      "parameters": {
+        "content": "## Get Available Apps and send to the User\n",
+        "height": 256,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1584,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "a0374b33-b062-4417-a928-5fc14138f27a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Get User information and verify email existence",
+        "height": 832,
+        "width": 1536,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1152,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "1c2b9a25-76b9-4d47-865d-014bdb5fb499",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Get Build Team and Manager permissions",
+        "height": 640,
+        "width": 1184,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1040,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "d97f19b1-d2a8-4c15-8172-29403a239c98",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Format data and make AppStoreConnect Requests\n",
+        "height": 544,
+        "width": 1488,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2256,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "7dcf7d2b-2840-4269-a3f1-7c67a57bcedf",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4aa47cf8-5edd-4898-9dbc-c85f12ff260a",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "User not found",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        224
+      ],
+      "id": "24b43784-70b6-4a91-a96e-8fada86bf6c4",
+      "name": "Verify Username Exists1"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Is API URL verification?').first().json.user }}",
+          "mode": "id"
+        },
+        "text": "A user with this email is already registered or invited to App Store Connect. Try again.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -1040,
+        176
+      ],
+      "id": "f95df841-be13-45bb-bcc0-e762ac0493b0",
+      "name": "Message reporting User already exists",
+      "webhookId": "490c4fd8-d7ce-48bd-a5bf-4f5e86c5c8ba",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "userInvitations",
+        "operation": "read_user_invitation_by_email",
+        "email": "={{ $('Message user asking for request details').first().json.data['What is your App Store Connect Email?'] }}"
+      },
+      "type": "CUSTOM.appStore",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        224
+      ],
+      "id": "7258bf75-0bda-463e-bbb9-592990f6c16d",
+      "name": "Get invitation by email"
+    },
+    {
+      "parameters": {
+        "resource": "reaction",
+        "channelId": {
+          "__rl": true,
+          "value": "C098BLZFQ3D",
+          "mode": "list",
+          "cachedResultName": "all-teste-appstore"
+        },
+        "timestamp": "={{ $json.ts }}",
+        "name": "credit_card"
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -1824,
+        448
+      ],
+      "id": "371a86f6-a5b6-4963-9f8b-a25e2486fc3e",
+      "name": "React to user message",
+      "webhookId": "56bfc41d-78ac-4212-8a43-ce61b6c58ed8",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "91648d49-0753-478a-9ccf-743f69548299",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "Invitation not found",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        224
+      ],
+      "id": "7a2596ba-b898-419c-8f0b-75aff2d7b95c",
+      "name": "Verify if an invitation with user email already exists"
+    },
+    {
+      "parameters": {
+        "jsCode": "const apps = $('Message user asking for request details').first().json.data['Which roles do you need for the account you need access on?']\n\nconst output = apps.join(',');\n\nreturn [\n  {\n    json: {\n      output: output\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        448
+      ],
+      "id": "858c9576-3f6c-4970-9647-8c93c1519c3c",
+      "name": "Transform Roles List into comma-separated string"
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Message user asking for request details').first().json.data['What is the ID of the manager of the games you choose?'] }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1408,
+        256
+      ],
+      "id": "f198fbf3-cfd7-474a-82ae-9630ebbc0d54",
+      "name": "Get information about the manager",
+      "webhookId": "036d9cf5-a398-49c6-bb4b-f791c8d363e6",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0980AM94AK",
+          "mode": "list",
+          "cachedResultName": "build-team"
+        },
+        "message": "=Approve here\nRequest made by: {{ $('Message user asking for request details').first().json.data['What is your first name?'] }} {{ $('Message user asking for request details').first().json.data['What is your last name?'] }}\nUser Id: {{ $('Slack Trigger').first().json.user }}\nApps: {{ $('Message user asking for request details').first().json.data['Put the IDs of the apps that you want to get Acess. Write in a comma-separated String without spaces.'] }}\nRoles: {{ $('Message user asking for request details').first().json.data['Which roles do you need for the account you need access on?'] }}\n\nReason: {{ $('Message user asking for request details').first().json.data['Why do you need this access?'] }}\n\nNo manager was asked by the user to aprove this request.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Granted",
+            "disapproveLabel": "Denied"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1456,
+        624
+      ],
+      "id": "d3ee8d6d-92c4-4961-8511-07bc985b4500",
+      "name": "Send to Build Without manager aproval",
+      "webhookId": "066216d5-44d4-448c-a0d6-26f3223dd858",
+      "credentials": {
+        "slackApi": {
+          "id": "X0hmE3TczNohXamn",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "modify_a_user_account"
+      },
+      "type": "CUSTOM.appStore",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        432
+      ],
+      "id": "86a20e49-9056-44b3-881f-c20f3a446274",
+      "name": "Modify a User Account"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Slack Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is API URL verification?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is API URL verification?": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "React to user message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message user asking for request details": {
+      "main": [
+        [
+          {
+            "node": "Modify a User Account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send details for manager approval": {
+      "main": [
+        [
+          {
+            "node": "Get information about the manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request approved by manager?": {
+      "main": [
+        [
+          {
+            "node": "Send to Build team",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify manager denied request to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request needs manager approval?": {
+      "main": [
+        [
+          {
+            "node": "Send details for manager approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send to Build Without manager aproval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Build team": {
+      "main": [
+        [
+          {
+            "node": "Request approved by build team?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request approved by build team?": {
+      "main": [
+        [
+          {
+            "node": "Transform Roles List into comma-separated string",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Build team denied request to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Username Exists": {
+      "main": [
+        [
+          {
+            "node": "Request needs manager approval?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message user reporting User not found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Give the asked roles to the User": {
+      "main": [
+        [
+          {
+            "node": "Notify Build team granted request to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify if is a User Creation": {
+      "main": [
+        [
+          {
+            "node": "Verify Username Exists1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Verify Username Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message user reporting User not found": {
+      "main": [
+        [
+          {
+            "node": "Message user asking for request details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify if is a User Creation1": {
+      "main": [
+        [
+          {
+            "node": "Invite a User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Give the asked roles to the User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invite a User": {
+      "main": [
+        [
+          {
+            "node": "Notify Build team granted request to user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message user Showing Apps": {
+      "main": [
+        [
+          {
+            "node": "Message user asking for request details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Available Apps": {
+      "main": [
+        [
+          {
+            "node": "Format the Apps into String",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format the Apps into String": {
+      "main": [
+        [
+          {
+            "node": "Message user Showing Apps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Username Exists1": {
+      "main": [
+        [
+          {
+            "node": "Message reporting User already exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get invitation by email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message reporting User already exists": {
+      "main": [
+        [
+          {
+            "node": "Message user asking for request details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get invitation by email": {
+      "main": [
+        [
+          {
+            "node": "Verify if an invitation with user email already exists",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message user reporting User not found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "React to user message": {
+      "main": [
+        [
+          {
+            "node": "Get All Available Apps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify if an invitation with user email already exists": {
+      "main": [
+        [
+          {
+            "node": "Message reporting User already exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Request needs manager approval?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Roles List into comma-separated string": {
+      "main": [
+        [
+          {
+            "node": "Verify if is a User Creation1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get information about the manager": {
+      "main": [
+        [
+          {
+            "node": "Request approved by manager?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Build Without manager aproval": {
+      "main": [
+        [
+          {
+            "node": "Request approved by build team?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modify a User Account": {
+      "main": [
+        [
+          {
+            "node": "Verify if is a User Creation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cc29ea65-2f85-4463-adab-40fcf60b2fbb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "612fd26c92ca3ca7586bc2dd072ae84f938a1d04a4747a1ca6cd14da0491748e"
+  },
+  "id": "QvNbv0LOWPN1keb2",
+  "tags": []
+}
