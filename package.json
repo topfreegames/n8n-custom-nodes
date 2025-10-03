@@ -1,5 +1,5 @@
 {
-  "name": "@topfreegames/n8n-custom-nodes",
+  "name": "n8n-custom-nodes",
   "version": "1.0.0",
   "description": "Custom n8n community nodes",
   "private": true,

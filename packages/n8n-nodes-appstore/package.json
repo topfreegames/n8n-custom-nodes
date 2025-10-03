@@ -1,5 +1,5 @@
 {
-  "name": "@topfreegames/n8n-nodes-appstore",
+  "name": "n8n-nodes-appstore-connect",
   "version": "0.1.0",
   "description": "n8n community node for Apple App Store Connect API",
   "keywords": [
